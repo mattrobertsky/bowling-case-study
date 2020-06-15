@@ -1,7 +1,10 @@
 package code
 
+sealed trait Frame
+case class OpenFrame(roll1:Int, roll2:Int) extends Frame
+case class Strike() extends Frame
+case class Spare(roll1:Int) extends Frame
 
-case class Frame(roll1:Int, roll2:Int)
 object Frame {
 
   def charToDigit(ch: Char): Int =
@@ -21,11 +24,11 @@ object Frame {
 
   def build(str: String): Frame = {
     if (str == "X")
-      Frame(10, 0)
+      Strike()
     else {
       (str(0), str(1)) match {
-        case (n, '/') => Frame(charToDigit(n), 10 - charToDigit(n))
-        case (n, m) => Frame(charToDigit(n), charToDigit(m))
+        case (n, '/') => Spare(charToDigit(n))
+        case (n, m) => OpenFrame(charToDigit(n), charToDigit(m))
       }
     }
   }
@@ -33,16 +36,29 @@ object Frame {
 
 object Main extends App {
 
-  def calculateScore(game:String):Int = {
 
-    game.split(" ") map Frame.build
-    
-    300
+  def scoreFrame(threeFrames: List[Frame]):Int = {
+    threeFrames match {
+      case Strike() :: Strike() :: Strike() => 30
+      case Strike() :: Strike() :: Spare(n) => 20 + n
+      case Strike() :: Strike() :: OpenFrame(n, _) => 20 + n
+      case Strike() :: Spare(_) => 20
+      case Strike() :: OpenFrame(n, m) => 10 + n + m
+      case Spare(_) :: Strike() => 20
+      case Spare(_) :: Spare(n) => 10 + n
+      case Spare(_) :: OpenFrame(n, _) => 10 + n
+      case OpenFrame(n, m) => n + m
+    }
   }
 
+  def calculateScore(game:String):Int = {
 
-  val gameString = "X X X X X X X X X X X X"
+    val frames = game.split(" ") map Frame.build
+    val framesList = frames.toList
+    framesList.sliding(3, 1)
 
+    300
+  }
 
 
 }
