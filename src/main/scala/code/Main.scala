@@ -39,15 +39,15 @@ object Main extends App {
 
   def scoreFrame(threeFrames: List[Frame]):Int = {
     threeFrames match {
-      case Strike() :: Strike() :: Strike() => 30
-      case Strike() :: Strike() :: Spare(n) => 20 + n
-      case Strike() :: Strike() :: OpenFrame(n, _) => 20 + n
-      case Strike() :: Spare(_) => 20
-      case Strike() :: OpenFrame(n, m) => 10 + n + m
-      case Spare(_) :: Strike() => 20
-      case Spare(_) :: Spare(n) => 10 + n
-      case Spare(_) :: OpenFrame(n, _) => 10 + n
-      case OpenFrame(n, m) => n + m
+      case Strike() :: Strike() :: Strike() :: Nil => 30
+      case Strike() :: Strike() :: Spare(n) :: Nil => 20 + n
+      case Strike() :: Strike() :: OpenFrame(n, _) :: Nil => 20 + n
+      case Strike() :: Spare(_)  :: _ => 20
+      case Strike() :: OpenFrame(n, m) :: Nil => 10 + n + m
+      case Spare(_) :: Strike() :: _ => 20
+      case Spare(_) :: Spare(n) :: _ => 10 + n
+      case Spare(_) :: OpenFrame(n, _) :: _ => 10 + n
+      case OpenFrame(n, m) :: _  => n + m
     }
   }
 
@@ -55,9 +55,7 @@ object Main extends App {
 
     val frames = game.split(" ") map Frame.build
     val framesList = frames.toList
-    framesList.sliding(3, 1)
-
-    300
+    framesList.sliding(3, 1).map(scoreFrame).toList.sum
   }
 
 

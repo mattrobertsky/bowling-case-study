@@ -45,6 +45,18 @@ class MainSpec extends WordSpec with Matchers {
     }
   }
 
+  "scoreFrame(frames) two" should {
+    "return score of first frame if no strike or spare n" in {
+     Main.scoreFrame(List(Spare(4), OpenFrame(4, 3), OpenFrame(4, 3))) shouldBe 14
+    }
+  }
+
+  "scoreFrame(frames) two" should {
+    "return score of first frame if no strike or spare m" in {
+     Main.scoreFrame(List(Spare(4), OpenFrame(4, 3))) shouldBe 14
+    }
+  }
+
 
 
 }
