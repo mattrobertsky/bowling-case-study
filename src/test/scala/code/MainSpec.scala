@@ -41,22 +41,32 @@ class MainSpec extends WordSpec with Matchers {
 
   "scoreFrame(frames)" should {
     "return score of first frame if no strike or spare" in {
-     Main.scoreFrame(List(OpenFrame(4, 3), OpenFrame(4, 3), OpenFrame(4, 3))) shouldBe 7
+     Main.scoreFrame(OpenFrame(4, 3), Some(OpenFrame(4, 3)), Some(OpenFrame(4, 3))) shouldBe 7
     }
   }
 
   "scoreFrame(frames) two" should {
     "return score of first frame if no strike or spare n" in {
-     Main.scoreFrame(List(Spare(4), OpenFrame(4, 3), OpenFrame(4, 3))) shouldBe 14
+     Main.scoreFrame(Spare(4), Some(OpenFrame(4, 3)), Some(OpenFrame(4, 3))) shouldBe 14
     }
   }
 
   "scoreFrame(frames) two" should {
     "return score of first frame if no strike or spare m" in {
-     Main.scoreFrame(List(Spare(4), OpenFrame(4, 3))) shouldBe 14
+     Main.scoreFrame(Spare(4), Some(OpenFrame(4, 3)), None) shouldBe 14
     }
   }
 
+  "A game with scores 9- 9- 9- 9- 9- 9- 9- 9- 9- 9-" should {
+    "return a total score of 90" in {
+      Main.calculateScore("9- 9- 9- 9- 9- 9- 9- 9- 9- 9-") shouldBe 90
+    }
+  }
 
+  "A game with scores 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5" should {
+    "return a total score of 90" in {
+      Main.calculateScore("5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5") shouldBe 150
+    }
+  }
 
 }

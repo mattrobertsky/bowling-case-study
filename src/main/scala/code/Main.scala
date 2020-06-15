@@ -23,8 +23,11 @@ object Frame {
     }
 
   def build(str: String): Frame = {
-    if (str == "X")
+    if (str == "X") {
       Strike()
+    } else if(str.length==1) {
+      OpenFrame(charToDigit(str(0)), 0)
+    }
     else {
       (str(0), str(1)) match {
         case (n, '/') => Spare(charToDigit(n))
@@ -37,25 +40,41 @@ object Frame {
 object Main extends App {
 
 
-  def scoreFrame(threeFrames: List[Frame]):Int = {
-    threeFrames match {
-      case Strike() :: Strike() :: Strike() :: Nil => 30
-      case Strike() :: Strike() :: Spare(n) :: Nil => 20 + n
-      case Strike() :: Strike() :: OpenFrame(n, _) :: Nil => 20 + n
-      case Strike() :: Spare(_)  :: _ => 20
-      case Strike() :: OpenFrame(n, m) :: Nil => 10 + n + m
-      case Spare(_) :: Strike() :: _ => 20
-      case Spare(_) :: Spare(n) :: _ => 10 + n
-      case Spare(_) :: OpenFrame(n, _) :: _ => 10 + n
-      case OpenFrame(n, m) :: _  => n + m
+  def scoreFrame(frame1:Frame, frame2:Option[Frame], frame3:Option[Frame]):Int = {
+    (frame1, frame2, frame3) match {
+      case (OpenFrame(n, m), _, _) =>  n + m
+      case (Strike(), Some(Strike()), Some(f3)) => {
+        f3 match {
+          case Strike() => 30
+          case Spare(n) => 20 + n
+          case OpenFrame(n, _) => 20 + n
+        }
+      }
+      case (Strike(), Some(f2), _) => {
+        f2 match {
+          case Spare(_) => 20
+          case OpenFrame(n, m) => 10 + n + m
+        }
+      }
+      case (Spare(_), Some(f2), _) => {
+        f2 match {
+          case Strike() => 20
+          case Spare(n) => 10 + n
+          case OpenFrame(n, _) => 10 + n
+        }
+      }
     }
   }
 
   def calculateScore(game:String):Int = {
 
     val frames = game.split(" ") map Frame.build
-    val framesList = frames.toList
-    framesList.sliding(3, 1).map(scoreFrame).toList.sum
+    val blanks = List.fill(12-frames.size)(OpenFrame(0,0))
+    val framesList = frames.toList ++ blanks
+
+    framesList.sliding(3, 1).map { window =>
+      scoreFrame(window.head, window.tail.headOption, window.tail.tail.headOption)
+    }.toList.sum
   }
 
 
