@@ -23,7 +23,7 @@ How bowling scores are calculated:
 
 - In each frame, the bowler gets up to two tries to knock down all the pins.
 
-- If in two tries, they fail to knock them all down, their score for that frame is the total number of pins knocked down in his two tries.
+- If in two tries, they fail to knock them all down, their score for that frame is the total number of pins knocked down in the two tries.
 
 - If in two tries they knock them all down, this is called a "spare" and their score for the frame is ten plus the number of pins knocked down on their next throw (in their next turn).
 
