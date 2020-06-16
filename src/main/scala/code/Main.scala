@@ -1,9 +1,15 @@
 package code
 
-sealed trait Frame
-case class OpenFrame(roll1:Int, roll2:Int) extends Frame
-case class Strike() extends Frame
-case class Spare(roll1:Int) extends Frame
+sealed trait Frame {
+  def value: Seq[Int]
+}
+case class Strike(r1: Int = 10) extends Frame {
+  override def value = Array(10)
+}
+case class Other(r1: Int, r2: Int = 0) extends Frame {
+  override def value = Array(r1,r2)
+}
+
 
 object Frame {
 
@@ -22,13 +28,15 @@ object Frame {
       case '9' => 9
     }
 
+
   def build(str: String): Frame = {
     if (str == "X")
       Strike()
     else {
-      (str(0), str(1)) match {
-        case (n, '/') => Spare(charToDigit(n))
-        case (n, m) => OpenFrame(charToDigit(n), charToDigit(m))
+      str.toArray match {
+        case Array(n) => Other(charToDigit(n))
+        case Array(n, '/') => Other(charToDigit(n), 10 - charToDigit(n))
+        case Array(n, m) => Other(charToDigit(n), charToDigit(m))
       }
     }
   }
@@ -36,28 +44,22 @@ object Frame {
 
 object Main extends App {
 
-
-  def scoreFrame(threeFrames: List[Frame]):Int = {
-    threeFrames match {
-      case Strike() :: Strike() :: Strike() :: Nil => 30
-      case Strike() :: Strike() :: Spare(n) :: Nil => 20 + n
-      case Strike() :: Strike() :: OpenFrame(n, _) :: Nil => 20 + n
-      case Strike() :: Spare(_)  :: _ => 20
-      case Strike() :: OpenFrame(n, m) :: Nil => 10 + n + m
-      case Spare(_) :: Strike() :: _ => 20
-      case Spare(_) :: Spare(n) :: _ => 10 + n
-      case Spare(_) :: OpenFrame(n, _) :: _ => 10 + n
-      case OpenFrame(n, m) :: _  => n + m
-    }
-  }
-
   def calculateScore(game:String):Int = {
 
-    val frames = game.split(" ") map Frame.build
-    val framesList = frames.toList
-    framesList.sliding(3, 1).map(scoreFrame).toList.sum
-  }
+    val values: Array[Int] = (game.split(" ") map {x => Frame.build(x).value}).flatten
 
+    def getValues(n: Int): Int = values(n) + values(n+1) + values(n+2)
+
+    (game.split(" ") map {Frame.build}).slice(0,10).zipWithIndex.map {
+      case (o, n) if o.value.sum == 10 =>
+        getValues(n)
+      case (o, _) =>
+        o.value.sum
+      case _ =>
+        0
+    }.sum
+
+  }
 
 }
 
