@@ -1,82 +1,57 @@
 package code
 
-sealed trait Frame
-case class OpenFrame(roll1:Int, roll2:Int) extends Frame
-case class Strike() extends Frame
-case class Spare(roll1:Int) extends Frame
+sealed trait Frame {
+  def value: Seq[Int]
+}
+case class Strike() extends Frame {
+  override def value = Array(10)
+}
+case class Other(r1: Int, r2: Int = 0) extends Frame {
+  override def value = Array(r1,r2)
+}
+
 
 object Frame {
 
-  def charToDigit(ch: Char): Int =
-    ch match {
-      case '-' => 0
-      case '0' => 0
-      case '1' => 1
-      case '2' => 2
-      case '3' => 3
-      case '4' => 4
-      case '5' => 5
-      case '6' => 6
-      case '7' => 7
-      case '8' => 8
-      case '9' => 9
+  def charToInt(in: Char): Int =
+    in.toString match {
+      case "-" => 0
+      case x => x.toInt
     }
 
   def build(str: String): Frame = {
-    if (str == "X") {
+    if (str == "X")
       Strike()
-    } else if(str.length==1) {
-      OpenFrame(charToDigit(str(0)), 0)
-    }
-    else {
-      (str(0), str(1)) match {
-        case (n, '/') => Spare(charToDigit(n))
-        case (n, m) => OpenFrame(charToDigit(n), charToDigit(m))
+    else
+      str.toArray match {
+        case Array(n) => Other(charToInt(n))
+        case Array(n, '/') => Other(charToInt(n), 10 - charToInt(n))
+        case Array(n, m) => Other(charToInt(n), charToInt(m))
       }
-    }
   }
 }
 
 object Main extends App {
 
+  def calculateScore(in:String):Int = {
 
-  def scoreFrame(frame1:Frame, frame2:Option[Frame], frame3:Option[Frame]):Int = {
-    (frame1, frame2, frame3) match {
-      case (OpenFrame(n, m), _, _) =>  n + m
-      case (Strike(), Some(Strike()), Some(f3)) => {
-        f3 match {
-          case Strike() => 30
-          case Spare(n) => 20 + n
-          case OpenFrame(n, _) => 20 + n
-        }
-      }
-      case (Strike(), Some(f2), _) => {
-        f2 match {
-          case Spare(_) => 20
-          case OpenFrame(n, m) => 10 + n + m
-        }
-      }
-      case (Spare(_), Some(f2), _) => {
-        f2 match {
-          case Strike() => 20
-          case Spare(n) => 10 + n
-          case OpenFrame(n, _) => 10 + n
-        }
-      }
-    }
+    // clean up the spacing of Spare
+    val game = in.replaceAll("(/){1}([0-9])$", "/ $2")
+
+    // build array of values
+    val values: Array[Int] = (game.split(" ") map {x => Frame.build(x).value}).flatten
+
+    // build indexed list of Frame(s), calculate value of each, and sum
+    (game.split(" ") map {Frame.build}).slice(0,10).zipWithIndex.map {
+      case (frame, i) if frame.value.sum == 10 =>
+        values(i) + values(i+1) + values(i+2)
+      case (frame, _) =>
+        frame.value.sum
+      case _ =>
+        0
+    }.sum
+
   }
-
-  def calculateScore(game:String):Int = {
-
-    val frames = game.split(" ") map Frame.build
-    val blanks = List.fill(12-frames.size)(OpenFrame(0,0))
-    val framesList = frames.toList ++ blanks
-
-    framesList.sliding(3, 1).map { window =>
-      scoreFrame(window.head, window.tail.headOption, window.tail.tail.headOption)
-    }.toList.sum
-  }
-
 
 }
 
