@@ -3,7 +3,7 @@ package code
 sealed trait Frame {
   def value: Seq[Int]
 }
-case class Strike(r1: Int = 10) extends Frame {
+case class Strike() extends Frame {
   override def value = Array(10)
 }
 case class Other(r1: Int, r2: Int = 0) extends Frame {
