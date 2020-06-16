@@ -22,9 +22,10 @@ class MainSpec extends WordSpec with Matchers {
     }
   }
 
-  // TODO figure out how to handle the 5/5 n.b. cheated with a space above
   "A game with scores 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/5" should {
-    "return a total score of 150" in (pending)
+    "return a total score of 150" in {
+      Main.calculateScore("5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/ 5/5") shouldBe 150
+    }
   }
 
   "A game with scores X X X X X X X X X X 12 --" should {
